@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UK Logistics Infrastructure | Interactive Distribution Map</title>
+  
+  <!-- Mapbox GL JS -->
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --color-bg: #0a0e14;
+      --color-card: #151a23;
+      --color-border: #1e2631;
+      --color-primary: #00d9ff;
+      --color-accent: #ff6b6b;
+      --color-text: #e8eaed;
+      --color-text-dim: #8b949e;
+      --color-success: #50fa7b;
+      --color-warning: #f1fa8c;
+      
+      /* Brand Colors */
+      --color-royal-mail: #E60000;
+      --color-post-office: #00A651;
+      --color-dpd: #DC0032;
+      --color-dhl: #FFCC00;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      height: 100%;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      overflow: hidden;
+    }
+    
+    /* Map Container */
+    #map {
+      position: fixed;
+      inset: 0;
+      background: #000;
+    }
+    
+    /* Header */
+    .header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 32px;
+      background: linear-gradient(180deg, rgba(10,14,20,0.95) 0%, rgba(10,14,20,0.8) 70%, rgba(10,14,20,0) 100%);
+      backdrop-filter: blur(12px);
+      z-index: 10;
+      border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+      animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .logo-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .logo {
+      font-family: 'Space Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-success) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-text-dim);
+      font-weight: 400;
+    }
+    
+    .header-stats {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .stat-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-text-dim);
+      font-weight: 400;
+    }
+    
+    /* Control Panel */
+    .control-panel {
+      position: absolute;
+      left: 32px;
+      top: 120px;
+      width: 300px;
+      max-height: calc(100vh - 180px);
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 20px;
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: slideInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      animation-delay: 0.2s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .control-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .control-panel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 3px;
+    }
+    
+    .control-panel::-webkit-scrollbar-thumb {
+      background: var(--color-primary);
+      border-radius: 3px;
+    }
+    
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      color: var(--color-text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .panel-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--color-primary);
+      border-radius: 2px;
+    }
+    
+    .view-mode {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .mode-btn {
+      padding: 12px 16px;
+      margin-bottom: 8px; /* Add margin to create spacing between buttons */
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      color: var(--color-text-dim);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mode-btn:hover {
+      background: rgba(0, 217, 255, 0.08);
+      border-color: var(--color-primary);
+      transform: translateX(4px);
+    }
+    
+    .mode-btn.active {
+      background: rgba(0, 217, 255, 0.15);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+    
+    .mode-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-border);
+      transition: all 0.3s ease;
+    }
+    
+    .mode-btn.active .mode-indicator {
+      background: var(--color-primary);
+      box-shadow: 0 0 12px var(--color-primary);
+    }
+    
+    /* Brand Filter Section */
+    #brandFilterSection {
+      overflow: visible;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                  opacity 0.3s ease;
+    }
+    
+    #brandFilterSection[style*="display: block"] {
+      max-height: calc(100vh - 320px);
+      opacity: 1;
+    }
+    
+    .brand-filter {
+      padding: 6px; /* Add padding to create space inside the dropdown */
+      margin-bottom: 20px; /* Add margin to create space below the dropdown */
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: calc(100vh - 360px);
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .brand-filter::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .brand-filter::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 3px;
+    }
+
+    .brand-filter::-webkit-scrollbar-thumb {
+      background: var(--color-primary);
+      border-radius: 3px;
+    }
+    
+    .brand-btn {
+      padding: 12px 16px;
+      margin-bottom: 8px; /* Add margin to create spacing between buttons */
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      color: var(--color-text);
+      font-family: 'Outfit', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .brand-btn::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--brand-color);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .brand-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateX(4px);
+    }
+    
+    .brand-btn.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--brand-color);
+      color: var(--brand-color);
+    }
+    
+    .brand-btn.active::before {
+      opacity: 1;
+    }
+    
+    .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .brand-logo {
+      width: 50px;
+      height: 50px;
+      object-fit: contain;
+      border-radius: 8px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    
+    .brand-btn:hover .brand-logo {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .brand-btn.active .brand-logo {
+      box-shadow: 0 0 12px var(--brand-color);
+    }
+    
+    .brand-color-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--brand-color);
+      box-shadow: 0 0 8px var(--brand-color);
+    }
+    
+    .brand-count {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-dim);
+      background: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .brand-btn.active .brand-count {
+      background: var(--brand-color);
+      color: var(--color-bg);
+    }
+    
+    .divider {
+      height: 1px;
+      background: var(--color-border);
+      margin: 16px 0;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    
+    .info-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--color-border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .info-value {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-success);
+    }
+    
+    .info-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-text-dim);
+    }
+    
+
+    /* Legend */
+    .legend {
+      position: absolute;
+      right: 32px;
+      bottom: 32px;
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 20px;
+      z-index: 10;
+      width: 260px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      animation-delay: 0.4s;
+      opacity: 0;
+      animation-fill-mode: forwards;
+    }
+    
+    .legend-title {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      color: var(--color-text);
+    }
+    
+    .gradient-bar {
+      height: 12px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, 
+        rgba(29,72,119,0.3) 0%,
+        rgba(251,176,33,0.5) 33%,
+        rgba(246,136,56,0.7) 66%,
+        rgba(238,62,50,1) 100%
+      );
+      margin-bottom: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .gradient-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--color-text-dim);
+      font-family: 'Space Mono', monospace;
+    }
+    
+    .legend-items {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+    
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    
+    /* Hint */
+    .hint {
+      position: absolute;
+      left: 50%;
+      bottom: 32px;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 24px;
+      font-size: 12px;
+      color: var(--color-text-dim);
+      font-family: 'Space Mono', monospace;
+      z-index: 10;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* Loading */
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 100;
+    }
+    
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(0, 217, 255, 0.1);
+      border-top-color: var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 16px;
+    }
+    
+    .loading-text {
+      font-family: 'Space Mono', monospace;
+      font-size: 14px;
+      color: var(--color-text-dim);
+    }
+    
+    /* Animations */
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        padding: 16px 20px;
+      }
+      
+      .header-stats {
+        display: none;
+      }
+      
+      .control-panel {
+        left: 20px;
+        top: 100px;
+        width: 260px;
+        padding: 16px;
+      }
+      
+      .legend {
+        right: 20px;
+        bottom: 20px;
+        width: 220px;
+      }
+      
+      .hint {
+        bottom: 20px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Indicator -->
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading logistics data...</div>
+  </div>
+
+  <!-- Map Container -->
+  <div id="map"></div>
+  
+  <!-- Header -->
+  <header class="header">
+    <div class="header-content">
+      <div class="logo-section">
+        <div class="logo">UK LOGISTICS</div>
+        <div class="subtitle">Infrastructure Distribution Network</div>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="totalFacilities">---</div>
+          <div class="stat-label">Facilities</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">2026</div>
+          <div class="stat-label">Updated</div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  
+  <!-- Control Panel -->
+  <div class="control-panel">
+    <div class="panel-title">View Mode</div>
+    <div class="view-mode">
+      <button class="mode-btn active" data-mode="heatmap">
+        <span>Density Heatmap</span>
+        <span class="mode-indicator"></span>
+      </button>
+      <button class="mode-btn" data-mode="points">
+        <span>Individual Points</span>
+        <span class="mode-indicator"></span>
+      </button>
+    </div>
+    
+    
+    <div id="brandFilterSection" style="display: none;">
+      <div class="divider"></div>
+      
+      <div class="panel-title">Filter by Brand</div>
+      <div class="brand-filter" id="brandFilter">
+        <!-- Will be populated dynamically -->
+      </div>
+      
+      <div class="divider"></div>
+    </div>
+    
+  </div>
+  
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Density Legend</div>
+    <div class="gradient-bar"></div>
+    <div class="gradient-labels">
+      <span>Low</span>
+      <span>Medium</span>
+      <span>High</span>
+    </div>
+    <div class="legend-items">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: rgba(29,72,119,0.6);"></div>
+        <span>Sparse Distribution</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: rgba(251,176,33,0.8);"></div>
+        <span>Moderate Density</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: rgba(238,62,50,1);"></div>
+        <span>High Concentration</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Hint -->
+  <div class="hint">Switch to Points mode to filter brands • Zoom and drag to explore</div>
+  
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <script>
+    // Brand color mapping
+    const brandColors = {
+      'Royal Mail': '#EE2722',
+      'Post Office': '#B13736',
+      'DPD': '#DC0032',
+      'DHL': '#FFCC00',
+      'Amazon Hub': '#48A3C6',
+      'Amazon Locker': '#ffffff',
+      'InPost': '#ffcc05',
+      'Yeep': '#007f4c',
+      'Mail Boxes Etc.': '#e5011e',
+      'Evri': '#0887d6'
+    };
+
+    const allBrandsColor = '#8b949e';
+    
+      const circleColorByBrand = [
+        "match",
+        ["get", "brand"],
+        ...Object.entries(brandColors).flat(),
+        allBrandsColor
+      ];
+    
+    // Brand logo mapping (SVG logos with better design)
+    const brandLogos = {
+      'Royal Mail': './Royal-Mail-Logo.png',
+      'Post Office':  './Post_Office_Logo.svg.png',
+      'Amazon Hub':  './Amazon_hub.png',
+      'Amazon Locker':  './Amazon_locker.png',
+      'InPost':  './Inpost.png',
+      'DPD':  './DPD.png',
+      'DHL':  './DHL.png',
+      'Yeep':  './YEEP.png',
+      'Mail Boxes Etc.':  './MBE_Logo.png',
+      'Evri':  './EVRI.png'
+    };
+
+    // Initialize Mapbox
+    mapboxgl.accessToken = "pk.eyJ1IjoiYXJ0aHVyemhhbmciLCJhIjoiY21rcGFidjdvMGNuYzNmc2VwMHozbHY5cCJ9.EfRDhi0H8NtAaFsEMMib-Q";
+
+    const map = new mapboxgl.Map({
+      container: "map",
+      style: "mapbox://styles/mapbox/dark-v11",
+      center: [-2.5, 54.5],
+      zoom: 5.2,
+      maxBounds: [[-20.0, 40.0], [15.0, 70.0]]
+    });
+
+    let currentFilter = null;
+    let geojsonData = null;
+
+    map.on("error", (e) => console.error("MAPBOX ERROR:", e?.error || e));
+
+    map.on("load", async () => {
+      // Load GeoJSON data
+      try {
+        const response = await fetch("./Logistics_UK.geojson");
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        geojsonData = await response.json();
+
+        const excludedBrands = new Set([
+          'Amazon Hub Locker',
+          'InPost Locker',
+          'Locker InPost',
+          'InPost'
+        ]);
+        if (Array.isArray(geojsonData.features)) {
+          geojsonData.features = geojsonData.features.filter(feature => {
+            const rawBrand = feature.properties?.brand;
+            const brand = typeof rawBrand === 'string' ? rawBrand.trim() : '';
+            return !excludedBrands.has(brand);
+          });
+        }
+        
+        // Update facility count
+        const facilityCount = geojsonData.features?.length || 0;
+        document.getElementById('totalFacilities').textContent = facilityCount.toLocaleString();
+        
+        console.log("Loaded features:", facilityCount);
+      } catch (err) {
+        console.error("Failed to load GeoJSON:", err);
+        document.getElementById('loading').innerHTML = `
+          <div class="loading-spinner"></div>
+          <div class="loading-text" style="color: var(--color-accent);">
+            Error loading data. Please ensure Logistics_UK.geojson is in the same folder.
+          </div>
+        `;
+        return;
+      }
+
+      // Hide loading indicator
+      document.getElementById('loading').style.display = 'none';
+
+      // Process brand data
+      const brandCounts = {};
+      geojsonData.features.forEach(feature => {
+        const rawBrand = feature.properties?.brand;
+        const brand = typeof rawBrand === 'string' ? rawBrand.trim() : '';
+        if (!brand) return;
+        brandCounts[brand] = (brandCounts[brand] || 0) + 1;
+      });
+
+      // Create brand filter buttons
+      const brandFilter = document.getElementById('brandFilter');
+      
+      // Add "All Brands" button first
+      const allButton = document.createElement('button');
+      allButton.className = 'brand-btn active';
+      allButton.dataset.brand = 'all';
+      allButton.style.setProperty('--brand-color', 'var(--color-primary)');
+      allButton.innerHTML = `
+        <div class="brand-info">
+          <img src="./Logistics.png" alt="All Brands" class="brand-logo" />
+          <span>All Brands</span>
+        </div>
+        <span class="brand-count">${geojsonData.features.length}</span>
+      `;
+      brandFilter.appendChild(allButton);
+
+      // Add individual brand buttons (top 10)
+      const top10Brands = Object.entries(brandCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8);
+
+      top10Brands.forEach(([brand, count]) => {
+        const button = document.createElement('button');
+        button.className = 'brand-btn';
+        button.dataset.brand = brand;
+        const color = brandColors[brand] || '#FFFFFF';
+        const logo = brandLogos[brand];
+        button.style.setProperty('--brand-color', color);
+
+        button.innerHTML = `
+          <div class="brand-info">
+            ${logo ? `<img src="${logo}" alt="${brand}" class="brand-logo" />` : `<div class="brand-color-dot" style="background: ${color};"></div>`}
+            <span>${brand}</span>
+          </div>
+          <span class="brand-count">${count}</span>
+        `;
+
+        brandFilter.appendChild(button);
+      });
+
+      // Add source
+      map.addSource("pts", {
+        type: "geojson",
+        data: geojsonData
+      });
+
+      // Add KDE Heatmap layer
+      map.addLayer({
+        id: "kde-heatmap",
+        type: "heatmap",
+        source: "pts",
+        maxzoom: 14, // Adjusted max zoom level to match the current view
+        paint: {
+          "heatmap-weight": 1,
+          "heatmap-intensity": [
+            "interpolate", ["linear"], ["zoom"],
+            4, 0.8,
+            7, 1.0,
+            10, 1.5,
+            11, 1.8
+          ],
+          "heatmap-radius": [
+            "interpolate", ["linear"], ["zoom"],
+            4, 1,
+            6, 2,
+            8, 3.5,
+            10, 5.5
+          ],
+          "heatmap-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            4, 0.95,
+            8, 0.85,
+            10, 0.75,
+            11, 0.65
+          ],
+          "heatmap-color": [
+            "interpolate", ["linear"], ["heatmap-density"],
+            0.00, "rgba(0,0,0,0)",
+            0.10, "rgba(29,72,119,0.2)",
+            0.30, "rgba(251,176,33,0.4)",
+            0.75, "rgba(246,136,56,0.6)",
+            1.00, "rgba(238,62,50,0.9)"
+          ]
+        }
+      });
+
+      // Add points layer
+      map.addLayer({
+        id: "pts-core",
+        type: "circle",
+        source: "pts",
+        layout: {
+          visibility: "none"
+        },
+        minzoom: 4,
+        maxzoom: 14, // Adjusted max zoom level to match the current view
+        paint: {
+          "circle-radius": [
+            "interpolate", ["linear"], ["zoom"],
+            8.5, 2.5, // Increased from 2 to 3
+            11, 4.5,  // Increased from 4 to 5
+            14, 7.5   // Increased from 6 to 8
+          ],
+          "circle-color": allBrandsColor,
+          "circle-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            8.5, 0.9,
+            11, 1.0,
+            14, 1.0
+          ],
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#000000",
+          "circle-stroke-opacity": 0.3
+        }
+      });
+
+      // View mode controls
+      const modeButtons = document.querySelectorAll('.mode-btn');
+      const brandFilterSection = document.getElementById('brandFilterSection');
+      
+      modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const mode = btn.dataset.mode;
+          
+          modeButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          if (mode === 'heatmap') {
+            map.setLayoutProperty('kde-heatmap', 'visibility', 'visible');
+            map.setLayoutProperty('pts-core', 'visibility', 'none'); // Ensure points layer is hidden in heatmap mode
+            
+            // Smooth hide brand filter section
+            brandFilterSection.style.maxHeight = '0';
+            brandFilterSection.style.opacity = '0';
+            setTimeout(() => {
+              brandFilterSection.style.display = 'none';
+            }, 400);
+            
+            // Reset to show all when switching to heatmap
+            map.setFilter("kde-heatmap", null);
+            map.setFilter("pts-core", null);
+            currentFilter = null;
+            
+            // Reset brand buttons
+            const brandButtons = document.querySelectorAll('.brand-btn');
+            brandButtons.forEach(b => b.classList.remove('active'));
+            document.querySelector('[data-brand="all"]').classList.add('active');
+            
+          } else {
+            map.setLayoutProperty('kde-heatmap', 'visibility', 'none');
+            map.setLayoutProperty('pts-core', 'visibility', 'visible');
+
+            // Sync points styling/filter with current active brand
+            const activeBrandBtn = document.querySelector('.brand-btn.active');
+            const activeBrand = activeBrandBtn?.dataset.brand;
+            if (!activeBrand || activeBrand === 'all') {
+              map.setFilter("pts-core", null);
+              map.setPaintProperty("pts-core", "circle-color", allBrandsColor);
+            } else {
+              const filter = ["==", ["get", "brand"], activeBrand];
+              map.setFilter("pts-core", filter);
+              map.setPaintProperty("pts-core", "circle-color", circleColorByBrand);
+            }
+            
+            // Smooth show brand filter section
+            brandFilterSection.style.display = 'block';
+            setTimeout(() => {
+              brandFilterSection.style.maxHeight = 'calc(100vh - 320px)';
+              brandFilterSection.style.opacity = '1';
+            }, 10);
+            
+            if (map.getZoom() < 8) {
+              map.flyTo({ zoom: 8, duration: 1000 });
+            }
+          }
+        });
+      });
+
+      // Brand filter functionality
+      const brandButtons = document.querySelectorAll('.brand-btn');
+      brandButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const brand = btn.dataset.brand;
+          
+          // Update active state
+          brandButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          // Apply filter
+          if (brand === 'all') {
+            map.setFilter("pts-core", null);
+            map.setFilter("kde-heatmap", null);
+            map.setPaintProperty("pts-core", "circle-color", allBrandsColor);
+            currentFilter = null;
+          } else {
+            const filter = ["==", ["get", "brand"], brand];
+            map.setFilter("pts-core", filter);
+            map.setFilter("kde-heatmap", filter);
+              map.setPaintProperty("pts-core", "circle-color", circleColorByBrand);
+            currentFilter = brand;
+          }
+        });
+      });
+
+      // Add click interaction for points
+      map.on('click', 'pts-core', (e) => {
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const properties = e.features[0].properties;
+        
+        let popupContent = '<div style="font-family: Outfit, sans-serif; padding: 4px;">';
+        popupContent += `<strong style="color: ${brandColors[properties.brand] || '#00d9ff'};">`;
+        popupContent += properties.brand || 'Logistics Facility';
+        popupContent += '</strong><br>';
+        for (const [key, value] of Object.entries(properties)) {
+          if (key !== 'brand') {
+            popupContent += `<small>${key}: ${value}</small><br>`;
+          }
+        }
+        popupContent += '</div>';
+        
+        new mapboxgl.Popup()
+          .setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map);
+      });
+
+      // Change cursor on hover
+      map.on('mouseenter', 'pts-core', () => {
+        map.getCanvas().style.cursor = 'pointer';
+      });
+
+      map.on('mouseleave', 'pts-core', () => {
+        map.getCanvas().style.cursor = '';
+      });
+
+      // Map zoom event
+      map.on('zoom', () => {
+        const zoom = map.getZoom();
+        if (zoom > 8 && map.getLayoutProperty('kde-heatmap', 'visibility') === 'visible') {
+          map.setLayoutProperty('pts-core', 'visibility', 'none');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
