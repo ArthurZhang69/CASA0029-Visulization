@@ -130,6 +130,513 @@
       font-weight: 400;
     }
     
+    /* OSM Attribution */
+    .osm-attribution {
+      position: absolute;
+      bottom: 28px;
+      left: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      padding: 7px 16px 7px 12px;
+      z-index: 50;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .osm-attribution:hover {
+      background: rgba(21, 26, 35, 0.95);
+      border-color: rgba(0, 217, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    
+    .osm-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    
+    .osm-text {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-text);
+      white-space: nowrap;
+      letter-spacing: 0.3px;
+    }
+    
+    .osm-text a {
+      color: var(--color-primary);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .osm-text a:hover {
+      color: var(--color-success);
+      text-decoration: underline;
+    }
+    
+    /* About Button & Panel */
+    .about-button {
+      position: absolute;
+      top: 88px;
+      right: 32px;
+      width: 40px;
+      height: 40px;
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .about-button.is-highlight {
+      animation: aboutPulse 1.4s ease-in-out 3;
+      box-shadow: 0 0 0 0 rgba(0, 217, 255, 0.45);
+    }
+    
+    .about-button:hover {
+      background: rgba(0, 217, 255, 0.15);
+      border-color: var(--color-primary);
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.3);
+    }
+    
+    .about-button svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--color-primary);
+      transition: all 0.3s ease;
+    }
+    
+    .about-button:hover svg {
+      fill: var(--color-primary);
+      transform: scale(1.1);
+    }
+
+    @keyframes aboutPulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 217, 255, 0.5);
+      }
+      50% {
+        transform: scale(1.08);
+        box-shadow: 0 0 0 12px rgba(0, 217, 255, 0.1);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(0, 217, 255, 0);
+      }
+    }
+    
+    .about-panel {
+      position: absolute;
+      top: 140px;
+      right: 32px;
+      width: 420px;
+      max-height: calc(100vh - 140px);
+      background: rgba(21, 26, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 24px;
+      z-index: 99;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow-y: auto;
+    }
+    
+    .about-panel.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .about-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .about-panel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 3px;
+    }
+    
+    .about-panel::-webkit-scrollbar-thumb {
+      background: var(--color-primary);
+      border-radius: 3px;
+    }
+    
+    .about-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .about-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .close-button {
+      width: 28px;
+      height: 28px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+    
+    .close-button:hover {
+      background: rgba(255, 107, 107, 0.2);
+      border-color: var(--color-accent);
+      transform: rotate(90deg);
+    }
+    
+    .close-button svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--color-text-dim);
+      transition: stroke 0.3s ease;
+    }
+    
+    .close-button:hover svg {
+      stroke: var(--color-accent);
+    }
+    
+    .about-content {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--color-text);
+      text-align: left;
+    }
+    
+    .about-content p {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .about-content p:first-child {
+      margin-top: -6px;
+    }
+    
+    .about-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .about-credit {
+      color: var(--color-primary);
+    }
+    
+    /* Chart Button & Panel */
+    .chart-button {
+      position: absolute;
+      top: 88px;
+      right: 84px;
+      width: 40px;
+      height: 40px;
+      background: rgba(21, 26, 35, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    
+    .chart-button:hover {
+      background: rgba(80, 250, 123, 0.15);
+      border-color: var(--color-success);
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(80, 250, 123, 0.3);
+    }
+    
+    .chart-button svg {
+      width: 20px;
+      height: 20px;
+      fill: var(--color-success);
+      transition: all 0.3s ease;
+    }
+    
+    .chart-button:hover svg {
+      transform: scale(1.1);
+    }
+    
+    .chart-panel {
+      position: absolute;
+      top: 150px;
+      right: 32px;
+      width: 420px;
+      max-height: calc(100vh - 200px);
+      background: rgba(21, 26, 35, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 24px;
+      z-index: 99;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chart-panel.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .chart-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .chart-panel::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 3px;
+    }
+    
+    .chart-panel::-webkit-scrollbar-thumb {
+      background: var(--color-success);
+      border-radius: 3px;
+    }
+
+    .chart-content {
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-right: 4px;
+      margin-right: -4px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 217, 255, 0.6) rgba(255, 255, 255, 0.06);
+    }
+
+    .chart-content::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .chart-content::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.35);
+    }
+
+    .chart-content::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(0, 217, 255, 0.95) 0%, rgba(80, 250, 123, 0.85) 100%);
+      border-radius: 999px;
+      border: 2px solid rgba(21, 26, 35, 0.85);
+      box-shadow: 0 0 10px rgba(0, 217, 255, 0.35);
+    }
+
+    .chart-content::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(0, 217, 255, 1) 0%, rgba(80, 250, 123, 1) 100%);
+    }
+    
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    
+    .chart-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--color-success);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .city-rank-item {
+      margin-bottom: 12px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      opacity: 0;
+      animation: slideIn 0.5s ease forwards;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, -20px);
+      }
+    }
+
+    @keyframes flyNoticeIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -16px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    @keyframes flyNoticeOut {
+      from {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, -16px);
+      }
+    }
+    
+    .city-rank-item:hover {
+      background: rgba(80, 250, 123, 0.08);
+      transform: translateX(4px);
+    }
+    
+    .city-rank-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .rank-number {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--color-success), var(--color-primary));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--color-bg);
+      flex-shrink: 0;
+    }
+    
+    .rank-number.gold {
+      background: linear-gradient(135deg, #FFD700, #FFA500);
+    }
+    
+    .rank-number.silver {
+      background: linear-gradient(135deg, #C0C0C0, #808080);
+    }
+    
+    .rank-number.bronze {
+      background: linear-gradient(135deg, #CD7F32, #8B4513);
+    }
+    
+    .city-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-text);
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      padding-right: 24px;
+    }
+    
+    .city-name:hover {
+      color: var(--color-primary);
+      transform: translateX(3px);
+    }
+    
+    .city-name::after {
+      content: '→';
+      position: absolute;
+      right: 4px;
+      opacity: 0;
+      transition: all 0.3s ease;
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+    
+    .city-name:hover::after {
+      opacity: 1;
+      right: 0;
+    }
+    
+    .city-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-success);
+    }
+    
+    .city-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .city-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-success), var(--color-primary));
+      border-radius: 4px;
+      transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
     /* Control Panel */
     .control-panel {
       position: absolute;
@@ -528,24 +1035,25 @@
       overflow: hidden;
       background-color: rgba(0,0,0,0);
       background: linear-gradient(90deg, 
-        rgba(0,0,0,0) 0%,
-        rgba(0,0,0,0) 9.5%,
+        rgba(35, 73, 99, 0.308) 0%,
+        rgba(4, 103, 196, 0.445) 15%,
         #007BD2 40%,
         #00A1CE 60%,
-        #1CEBC4 85%,
+        #1CEBC4 75%,
         #C6FFC9 100%
       );
       margin-bottom: 8px;
       border: none;
-      box-shadow: 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+      box-shadow: none;
     }
     
     .gradient-labels {
       display: flex;
       justify-content: space-between;
       font-size: 11px;
-      color: var(--color-text-dim);
-      font-family: 'Space Mono', monospace;
+      color: #ffffff;
+      text-transform: capitalize;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
       font-weight: 700;
     }
     
@@ -566,7 +1074,15 @@
     .legend-dot {
       width: 10px;
       height: 10px;
-      border-radius: 50%;
+      border-radius: 2px;
+      clip-path: polygon(
+        25% 0%,
+        75% 0%,
+        100% 50%,
+        75% 100%,
+        25% 100%,
+        0% 50%
+      );
       flex-shrink: 0;
     }
     
@@ -731,6 +1247,23 @@
       min-height: 18px;
       animation: pulse 2s ease-in-out infinite;
     }
+
+    .loading-attribution {
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--color-text-dim);
+      letter-spacing: 0.3px;
+    }
+
+    .loading-attribution a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .loading-attribution a:hover {
+      color: var(--color-success);
+      text-decoration: underline;
+    }
     
     /* Animations */
     @keyframes slideDown {
@@ -823,6 +1356,51 @@
         bottom: 20px;
         font-size: 11px;
       }
+      
+      .about-button {
+        top: 16px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+      }
+      
+      .about-panel {
+        top: 70px;
+        right: 20px;
+        left: 20px;
+        width: auto;
+        max-height: calc(100vh - 100px);
+      }
+      
+      .chart-button {
+        top: 16px;
+        right: 68px;
+        width: 36px;
+        height: 36px;
+      }
+      
+      .chart-panel {
+        top: 70px;
+        right: 20px;
+        left: 20px;
+        width: auto;
+        max-height: calc(100vh - 100px);
+      }
+      
+      .osm-attribution {
+        bottom: 20px;
+        left: 20px;
+        padding: 5px 10px 5px 8px;
+      }
+      
+      .osm-logo {
+        width: 28px;
+        height: 28px;
+      }
+      
+      .osm-text {
+        font-size: 10px;
+      }
     }
   </style>
 </head>
@@ -837,6 +1415,9 @@
       </div>
       <div class="loading-progress-text" id="loadingProgressText">0%</div>
       <div class="loading-substatus" id="loadingSubstatus">Initializing...</div>
+      <div class="loading-attribution">
+        Data Powered by <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener">OpenStreetMap</a>
+      </div>
     </div>
   </div>
 
@@ -862,6 +1443,57 @@
       </div>
     </div>
   </header>
+  
+  <!-- About Button -->
+  <div class="about-button" id="aboutButton">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M12 16v-4M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  
+  <!-- Chart Button -->
+  <div class="chart-button" id="chartButton">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+      <path d="M8 10v7M12 7v10M16 13v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  
+  <!-- About Panel -->
+  <div class="about-panel" id="aboutPanel">
+    <div class="about-header">
+      <div class="about-title">About This Project</div>
+      <div class="close-button" id="closeAbout">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="about-content">
+      <p>This project presents an interactive map of logistics infrastructure across the United Kingdom, using spatial visualisation to examine patterns of concentration and absence at multiple scales. Facilities are represented through complementary density methods, including continuous density surfaces and hexagonal aggregation, with individual locations revealed at higher zoom levels.</p>
+      <p>The interface supports multiple analytical views, allowing users to filter and switch between different logistics brands and facility subsets. Rather than providing a definitive assessment of service provision or performance, the map functions as an exploratory tool for examining logistics networks, regional structure, and infrastructural inequality, while illustrating the strengths and limitations of different approaches to representing spatial density.</p>
+      <p>Data sources: Logistics facility locations are compiled from OpenStreetMap (© OpenStreetMap contributors), accessed and processed for research and visualisation purposes. Base map and rendering are provided by Mapbox.</p>
+      <p class="about-credit">Created & Visualized by Arthur Zhang</p>
+    </div>
+  </div>
+  
+  <!-- Chart Panel -->
+  <div class="chart-panel" id="chartPanel">
+    <div class="chart-header">
+      <div class="chart-title">Top Cities by Facilities</div>
+      <div class="close-button" id="closeChart">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="chart-content">
+      <div id="cityRankings">
+        <!-- Will be populated by JavaScript -->
+      </div>
+    </div>
+  </div>
   
   
   <!-- Control Panel -->
@@ -999,8 +1631,10 @@
       "interpolate", ["linear"], ["zoom"],
       4, 0.75,
       8, 0.65,
-      10, 0.55,
-      11, 0.45
+      10, 0.0,
+      11, 0.00,
+      12, 0.05,
+      14, 0.03
     ];
     const heatmapRadiusDefault = [
       "interpolate", ["linear"], ["zoom"],
@@ -1056,12 +1690,21 @@
       11, 10.5,
       14, 13.5
     ];
+    const glowOpacityPoints = [
+      "interpolate", ["linear"], ["zoom"],
+      8.5, 0.22,
+      11, 0.5,
+      14, 0.99
+    ];
     const pointOpacityHybrid = [
       "interpolate", ["linear"], ["zoom"],
-      8.5, 0.12,
-      10.5, 0.4,
-      12, 0.55,
-      14, 0.65
+      8.5, 0.03,
+      9.5,0.90,
+      10.5, 0.95,
+      12, 0.95,
+      16, 0.95,
+      20, 0.85,
+      22, 1.0
     ];
     const pointRadiusHybrid = [
       "interpolate", ["linear"], ["zoom"],
@@ -1100,7 +1743,7 @@
       style: "mapbox://styles/mapbox/dark-v11",
       center: [-2.5, 54.5],
       zoom: 5.2,
-      maxBounds: [[-20.0, 40.0], [15.0, 70.0]]
+      maxBounds: [[-20.0, 40.0], [10.0, 65.0]]
     });
 
     const defaultMode = 'hybrid';
@@ -1369,7 +2012,7 @@
         id: "kde-heatmap",
         type: "heatmap",
         source: "pts",
-        maxzoom: 14, // Adjusted max zoom level to match the current view
+        maxzoom: 22, // Allow points to remain visible at higher zoom levels
         paint: {
           "heatmap-weight": 1,
           "heatmap-intensity": [
@@ -1535,6 +2178,38 @@
       });
 
       // Add points layer
+      // Add glow layer (beneath pts-core for subtle backlight effect)
+      map.addLayer({
+        id: "pts-glow",
+        type: "circle",
+        source: "pts",
+        layout: {
+          visibility: "none"
+        },
+        minzoom: 4,
+        maxzoom: 22,
+        paint: {
+          "circle-radius": [
+            "interpolate", ["linear"], ["zoom"],
+            4, 4,
+            8, 6,
+            14, 10,
+            18, 14
+          ],
+          "circle-color": "rgba(255, 255, 255, 0.35)",
+          "circle-opacity": [
+            "interpolate", ["linear"], ["zoom"],
+            8, 0.08,
+            12, 0.38,
+            16, 0.8,
+            20, 0.35,
+            22, 0.2
+          ],
+          "circle-blur": 1.5
+        }
+      });
+      
+      // Add main points layer
       map.addLayer({
         id: "pts-core",
         type: "circle",
@@ -1543,7 +2218,7 @@
           visibility: "none"
         },
         minzoom: 4,
-        maxzoom: 14, // Adjusted max zoom level to match the current view
+        maxzoom: 22, // Keep points visible at higher zoom levels
         paint: {
           "circle-radius": [
             ...pointRadiusDefault
@@ -1597,6 +2272,10 @@
             } else {
               map.setPaintProperty('kde-heatmap', 'heatmap-opacity', 0);
             }
+            
+            // Hide glow layer in heatmap mode
+            map.setLayoutProperty('pts-glow', 'visibility', 'none');
+            
             fadeLayerOpacity('pts-core', 'circle-opacity', 0);
             map.setPaintProperty('pts-core', 'circle-radius', pointRadiusDefault);
             
@@ -1629,16 +2308,24 @@
             map.setLayoutProperty('kde-heatmap', 'visibility', 'none');
             map.setLayoutProperty('hex-heatmap', 'visibility', 'visible');
             map.setPaintProperty('hex-heatmap', 'fill-opacity', hexOpacityHybrid);
+            
+            // Show glow layer for subtle backlight effect
+            map.setLayoutProperty('pts-glow', 'visibility', 'visible');
             map.setLayoutProperty('pts-core', 'visibility', 'visible');
+            
             map.moveLayer('hex-heatmap');
+            map.moveLayer('pts-glow');
             map.moveLayer('pts-core');
             bringLabelsToTop();
+            
             map.setPaintProperty('pts-core', 'circle-opacity', pointOpacityHybrid);
             map.setPaintProperty('pts-core', 'circle-radius', pointRadiusHybrid);
-            map.setPaintProperty('pts-core', 'circle-color', '#d6d9dd');
+            map.setPaintProperty('pts-core', 'circle-color', '#ffffff');
+            map.setPaintProperty('pts-glow', 'circle-color', 'rgba(255, 255, 255, 0.35)');
 
             // Hybrid mode always uses full dataset (ignore brand filter)
             map.setFilter("pts-core", null);
+            map.setFilter("pts-glow", null);
             updateHexLayer(geojsonData, 'all');
             
             // Hide brand filter section in hybrid mode
@@ -1652,6 +2339,12 @@
             fadeLayerOpacity('kde-heatmap', 'heatmap-opacity', 0);
             map.setLayoutProperty('kde-heatmap', 'visibility', 'none');
             map.setLayoutProperty('hex-heatmap', 'visibility', 'none');
+            
+            // Hide glow layer in points mode
+            map.setLayoutProperty('pts-glow', 'visibility', 'visible');
+            map.setPaintProperty('pts-glow', 'circle-color', circleColorByBrand);
+            map.setPaintProperty('pts-glow', 'circle-opacity', glowOpacityPoints);
+            
             fadeLayerOpacity('pts-core', 'circle-opacity', pointOpacityDefault);
             map.setPaintProperty('pts-core', 'circle-radius', pointRadiusHybrid);
 
@@ -1670,6 +2363,9 @@
               map.setFilter("pts-core", null);
               map.setPaintProperty("pts-core", "circle-color", circleColorByBrand);
               map.setPaintProperty("pts-core", "circle-opacity", pointOpacityDefault);
+              map.setFilter("pts-glow", null);
+              map.setPaintProperty("pts-glow", "circle-color", circleColorByBrand);
+              map.setPaintProperty("pts-glow", "circle-opacity", glowOpacityPoints);
             } else {
               const activeBrandColor = brandColors[activeBrand] || allBrandsColor;
               map.setFilter("pts-core", null);
@@ -1685,6 +2381,19 @@
                 pointOpacityDefault,
                 pointOpacityDimmed
               ]);
+              map.setFilter("pts-glow", null);
+              map.setPaintProperty("pts-glow", "circle-color", [
+                "case",
+                ["==", ["get", "brand"], activeBrand],
+                activeBrandColor,
+                dimmedPointColor
+              ]);
+              map.setPaintProperty("pts-glow", "circle-opacity", [
+                "case",
+                ["==", ["get", "brand"], activeBrand],
+                glowOpacityPoints,
+                pointOpacityDimmed
+              ]);
             }
             
             // Smooth show brand filter section
@@ -1693,6 +2402,14 @@
               brandFilterSection.style.maxHeight = '600px';
               brandFilterSection.style.opacity = '1';
             }, 10);
+
+            const chartPanelEl = document.getElementById('chartPanel');
+            if (chartPanelEl) {
+              setTimeout(() => {
+                renderCityRankings();
+                chartPanelEl.classList.add('active');
+              }, 0);
+            }
           }
         });
       });
@@ -1736,6 +2453,9 @@
               }
               map.setPaintProperty("pts-core", "circle-color", circleColorByBrand);
               map.setPaintProperty("pts-core", "circle-opacity", currentOpacity);
+              map.setFilter("pts-glow", ["has", "brand"]);
+              map.setPaintProperty("pts-glow", "circle-color", circleColorByBrand);
+              map.setPaintProperty("pts-glow", "circle-opacity", glowOpacityPoints);
               currentFilter = null;
               return;
             }
@@ -1748,6 +2468,9 @@
             }
             map.setPaintProperty("pts-core", "circle-color", activeBrandColor);
             map.setPaintProperty("pts-core", "circle-opacity", currentOpacity);
+            map.setFilter("pts-glow", filter);
+            map.setPaintProperty("pts-glow", "circle-color", activeBrandColor);
+            map.setPaintProperty("pts-glow", "circle-opacity", glowOpacityPoints);
             currentFilter = brand;
           };
 
@@ -1826,6 +2549,252 @@
         if (currentMode === 'heatmap' && zoom > 8 && map.getLayoutProperty('kde-heatmap', 'visibility') === 'visible') {
           map.setLayoutProperty('pts-core', 'visibility', 'none');
         }
+      });
+      
+      // About panel functionality
+      const aboutButton = document.getElementById('aboutButton');
+      const aboutPanel = document.getElementById('aboutPanel');
+      const closeAbout = document.getElementById('closeAbout');
+
+      // Highlight About button on initial load
+      if (aboutButton) {
+        aboutButton.classList.add('is-highlight');
+        setTimeout(() => {
+          aboutButton.classList.remove('is-highlight');
+        }, 4500);
+      }
+      
+      aboutButton.addEventListener('click', () => {
+        chartPanel.classList.remove('active');
+        aboutPanel.classList.toggle('active');
+      });
+      
+      closeAbout.addEventListener('click', () => {
+        aboutPanel.classList.remove('active');
+      });
+      
+      // Close about panel when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!aboutPanel.contains(e.target) && !aboutButton.contains(e.target) &&
+            !chartPanel.contains(e.target) && !chartButton.contains(e.target) &&
+            !brandFilterSection.contains(e.target)) {
+          aboutPanel.classList.remove('active');
+          chartPanel.classList.remove('active');
+        }
+      });
+      
+      // Close panels with Escape key
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          if (aboutPanel.classList.contains('active')) {
+            aboutPanel.classList.remove('active');
+          }
+          if (chartPanel.classList.contains('active')) {
+            chartPanel.classList.remove('active');
+          }
+        }
+      });
+      
+      // Chart button functionality
+      const chartButton = document.getElementById('chartButton');
+      const chartPanel = document.getElementById('chartPanel');
+      const closeChart = document.getElementById('closeChart');
+      const cityRankings = document.getElementById('cityRankings');
+      
+      // Calculate city statistics
+      function calculateCityRankings() {
+        const cityCounts = {};
+        
+        geojsonData.features.forEach(feature => {
+          const city = feature.properties['addr:city'] || feature.properties.city || 'Unknown';
+          if (city && city !== 'Unknown') {
+            cityCounts[city] = (cityCounts[city] || 0) + 1;
+          }
+        });
+        
+        // Sort cities by count
+        const sortedCities = Object.entries(cityCounts)
+          .sort(([,a], [,b]) => b - a)
+          .slice(0, 20); // Top 20 cities
+        
+        return sortedCities;
+      }
+      
+      // Render city rankings
+      function renderCityRankings() {
+        const rankings = calculateCityRankings();
+        const maxCount = rankings[0]?.[1] || 1;
+        
+        cityRankings.innerHTML = rankings.map(([city, count], index) => {
+          const percentage = (count / maxCount) * 100;
+          const rankClass = index === 0 ? 'gold' : index === 1 ? 'silver' : index === 2 ? 'bronze' : '';
+          // Escape city name for safe use in onclick
+          const safeCityName = city.replace(/'/g, "\\'");
+          
+          return `
+            <div class="city-rank-item" style="animation-delay: ${index * 0.05}s">
+              <div class="city-rank-header">
+                <div class="rank-number ${rankClass}">${index + 1}</div>
+                <div class="city-name" onclick="flyToCity('${safeCityName}')" title="Click to fly to ${city}">${city}</div>
+                <div class="city-count">${count.toLocaleString()}</div>
+              </div>
+              <div class="city-bar-container">
+                <div class="city-bar" style="width: ${percentage}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Function to fly to a city on the map
+      window.flyToCity = function(cityName) {
+        playTakeoffSound();
+        // Find all facilities in this city
+        const cityFeatures = geojsonData.features.filter(feature => {
+          const city = feature.properties['addr:city'] || feature.properties.city;
+          return city === cityName;
+        });
+        
+        if (cityFeatures.length === 0) {
+          console.log('No features found for city:', cityName);
+          return;
+        }
+        
+        // Calculate bounds of all features in this city
+        const coords = cityFeatures.map(f => f.geometry.coordinates);
+        const lngs = coords.map(c => c[0]);
+        const lats = coords.map(c => c[1]);
+        
+        const minLng = Math.min(...lngs);
+        const maxLng = Math.max(...lngs);
+        const minLat = Math.min(...lats);
+        const maxLat = Math.max(...lats);
+        
+        // Calculate center
+        const centerLng = (minLng + maxLng) / 2;
+        const centerLat = (minLat + maxLat) / 2;
+        
+        // Calculate appropriate zoom level based on bounds
+        const lngDiff = maxLng - minLng;
+        const latDiff = maxLat - minLat;
+        const maxDiff = Math.max(lngDiff, latDiff);
+        
+        // Determine zoom level (larger spread = lower zoom)
+        let zoomLevel = 11;
+        if (maxDiff > 0.5) zoomLevel = 9;
+        else if (maxDiff > 0.2) zoomLevel = 10;
+        else if (maxDiff > 0.1) zoomLevel = 11;
+        else if (maxDiff > 0.05) zoomLevel = 12;
+        else zoomLevel = 13;
+        
+        // Show notification
+        showFlyNotification(cityName, cityFeatures.length);
+        
+        // Fly to the city with smooth animation
+        map.flyTo({
+          center: [centerLng, centerLat],
+          zoom: zoomLevel,
+          duration: 2000,
+          essential: true,
+          easing: function(t) {
+            // Custom easing: ease-in-out
+            return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          }
+        });
+      };
+
+      function playTakeoffSound() {
+        try {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          const audioCtx = new AudioContextClass();
+          const duration = 0.9;
+          const now = audioCtx.currentTime;
+
+          const bufferSize = audioCtx.sampleRate * duration;
+          const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+          const data = noiseBuffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i += 1) {
+            data[i] = (Math.random() * 2 - 1) * 0.5;
+          }
+
+          const noiseSource = audioCtx.createBufferSource();
+          noiseSource.buffer = noiseBuffer;
+
+          const bandpass = audioCtx.createBiquadFilter();
+          bandpass.type = 'bandpass';
+          bandpass.frequency.setValueAtTime(900, now);
+          bandpass.frequency.exponentialRampToValueAtTime(2400, now + duration);
+          bandpass.Q.value = 0.6;
+
+          const gainNode = audioCtx.createGain();
+          gainNode.gain.setValueAtTime(0.0001, now);
+          gainNode.gain.exponentialRampToValueAtTime(0.06, now + 0.12);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+          noiseSource.connect(bandpass);
+          bandpass.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+
+          noiseSource.start(now);
+          noiseSource.stop(now + duration);
+          noiseSource.onended = () => {
+            audioCtx.close();
+          };
+        } catch (e) {
+          console.warn('Audio play failed:', e);
+        }
+      }
+      
+      // Function to show fly notification
+      function showFlyNotification(cityName, facilityCount) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 120px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: linear-gradient(135deg, var(--color-success), var(--color-primary));
+          color: var(--color-bg);
+          padding: 14px 28px;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 14px;
+          z-index: 1000;
+          box-shadow: 0 8px 24px rgba(0, 217, 255, 0.4);
+          animation: flyNoticeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          pointer-events: none;
+        `;
+        notification.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 18px;">✈️</span>
+            <span>Flying to <strong>${cityName}</strong> (${facilityCount} facilities)</span>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // Remove notification after animation
+        setTimeout(() => {
+          notification.style.animation = 'flyNoticeOut 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+          setTimeout(() => notification.remove(), 400);
+        }, 2000);
+      }
+      
+      chartButton.addEventListener('click', () => {
+        const wasActive = chartPanel.classList.contains('active');
+        
+        // Close about panel if open
+        aboutPanel.classList.remove('active');
+        
+        if (!wasActive) {
+          renderCityRankings();
+        }
+        
+        chartPanel.classList.toggle('active');
+      });
+      
+      closeChart.addEventListener('click', () => {
+        chartPanel.classList.remove('active');
       });
     });
   </script>
