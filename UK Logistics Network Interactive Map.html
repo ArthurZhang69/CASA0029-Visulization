@@ -1829,70 +1829,109 @@
         }
       }, 240);
 
-      const fetchGeoJSONWithProgress = async (url) => {
-        setSubstatus('Downloading data...');
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-
-        const contentLength = response.headers.get('content-length');
-        if (!response.body || !contentLength) {
-          const data = await response.json();
-          setLoadingProgress(100);
-          setSubstatus('Complete!');
-          return data;
-        }
-
-        const total = parseInt(contentLength, 10);
-        const reader = response.body.getReader();
-        let received = 0;
-        const chunks = [];
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          received += value.length;
-          const downloadProgress = (received / total) * 100;
-          setLoadingProgress(Math.max(downloadProgress, 60));
+      const fetchGeoJSONWithProgress = async (url, retryCount = 0, maxRetries = 3) => {
+        const timeout = 30000; // 30 seconds timeout
+        
+        try {
+          setSubstatus('Downloading data...');
           
-          // Update substatus based on download progress
-          if (downloadProgress < 30) {
-            setSubstatus('Downloading data... (establishing connection)');
-          } else if (downloadProgress < 70) {
-            setSubstatus(`Downloading data... (${Math.round(downloadProgress)}%)`);
-          } else {
-            setSubstatus('Downloading data... (almost there)');
-          }
-        }
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), timeout);
+          
+          const response = await fetch(url, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
 
-        const all = new Uint8Array(received);
-        let position = 0;
-        for (const chunk of chunks) {
-          all.set(chunk, position);
-          position += chunk.length;
+          const contentLength = response.headers.get('content-length');
+          if (!response.body || !contentLength) {
+            const data = await response.json();
+            setLoadingProgress(100);
+            setSubstatus('Complete!');
+            return data;
+          }
+
+          const total = parseInt(contentLength, 10);
+          const reader = response.body.getReader();
+          let received = 0;
+          const chunks = [];
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            chunks.push(value);
+            received += value.length;
+            const downloadProgress = (received / total) * 100;
+            setLoadingProgress(Math.max(downloadProgress, 60));
+            
+            // Update substatus based on download progress
+            if (downloadProgress < 30) {
+              setSubstatus('Downloading data... (establishing connection)');
+            } else if (downloadProgress < 70) {
+              setSubstatus(`Downloading data... (${Math.round(downloadProgress)}%)`);
+            } else {
+              setSubstatus('Downloading data... (almost there)');
+            }
+          }
+
+          const all = new Uint8Array(received);
+          let position = 0;
+          for (const chunk of chunks) {
+            all.set(chunk, position);
+            position += chunk.length;
+          }
+          
+          setSubstatus('Processing data...');
+          const text = new TextDecoder('utf-8').decode(all);
+          setLoadingProgress(95);
+          
+          // Add small delay to show processing
+          await new Promise(resolve => setTimeout(resolve, 200));
+          
+          setSubstatus('Parsing JSON...');
+          const data = JSON.parse(text);
+          setLoadingProgress(100);
+          
+          // Wait for animation to complete
+          await new Promise(resolve => setTimeout(resolve, 300));
+          setSubstatus('Ready!');
+          
+          return data;
+        } catch (err) {
+          // Retry logic for network failures
+          if (retryCount < maxRetries && (err.name === 'AbortError' || err instanceof TypeError)) {
+            console.warn(`Load attempt ${retryCount + 1} failed, retrying... (${err.message})`);
+            setSubstatus(`Connection interrupted. Retrying (${retryCount + 1}/${maxRetries})...`);
+            
+            // Exponential backoff: wait longer before each retry
+            const waitTime = Math.min(1000 * Math.pow(2, retryCount), 5000);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+            
+            return fetchGeoJSONWithProgress(url, retryCount + 1, maxRetries);
+          }
+          
+          throw err;
         }
-        
-        setSubstatus('Processing data...');
-        const text = new TextDecoder('utf-8').decode(all);
-        setLoadingProgress(95);
-        
-        // Add small delay to show processing
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        setSubstatus('Parsing JSON...');
-        const data = JSON.parse(text);
-        setLoadingProgress(100);
-        
-        // Wait for animation to complete
-        await new Promise(resolve => setTimeout(resolve, 300));
-        setSubstatus('Ready!');
-        
-        return data;
       };
 
       // Load GeoJSON data
       try {
-        geojsonData = await fetchGeoJSONWithProgress("./Logistics_UK.geojson");
+        // Try main path first
+        try {
+          geojsonData = await fetchGeoJSONWithProgress("./Logistics_UK.geojson");
+        } catch (err) {
+          // If that fails, try alternative paths
+          console.warn("Failed with ./Logistics_UK.geojson, trying alternatives...", err);
+          
+          // Try absolute filename search
+          const response = await fetch("Logistics_UK.geojson");
+          if (response.ok) {
+            geojsonData = await response.json();
+            console.log("Loaded using alternative path");
+          } else {
+            throw err; // Re-throw if alternative also fails
+          }
+        }
 
         const excludedBrands = new Set([
           'Amazon Hub Locker',
@@ -1919,10 +1958,41 @@
         console.log("Loaded features:", facilityCount);
       } catch (err) {
         console.error("Failed to load GeoJSON:", err);
+        
+        let errorMessage = 'Error loading data.';
+        let errorDetails = '';
+        
+        if (err.message.includes('404')) {
+          errorMessage = 'File not found';
+          errorDetails = 'Ensure Logistics_UK.geojson is in the same folder as this HTML file.';
+        } else if (err.name === 'AbortError' || err.message.includes('timed out')) {
+          errorMessage = 'Connection timeout';
+          errorDetails = 'Network connection is too slow. Check your internet and try refreshing.';
+        } else if (err instanceof SyntaxError) {
+          errorMessage = 'Invalid data file';
+          errorDetails = 'The GeoJSON file may be corrupted. Try re-downloading it.';
+        } else if (err instanceof TypeError) {
+          errorMessage = 'Network error';
+          errorDetails = 'Unable to connect to the data file. Check if you\'re online.';
+        }
+        
         document.getElementById('loading').innerHTML = `
-          <div class="loading-spinner"></div>
-          <div class="loading-text" style="color: var(--color-accent);">
-            Error loading data. Please ensure Logistics_UK.geojson is in the same folder.
+          <div class="loading-spinner" style="animation: none; opacity: 0.5;"></div>
+          <div class="loading-text" style="color: var(--color-accent); margin-top: 20px;">
+            <div style="font-size: 18px; margin-bottom: 8px;">${errorMessage}</div>
+            <div style="font-size: 13px; color: var(--color-text-dim); margin-bottom: 16px;">${errorDetails}</div>
+            <button onclick="location.reload()" style="
+              padding: 10px 20px;
+              background: var(--color-primary);
+              color: var(--color-bg);
+              border: none;
+              border-radius: 6px;
+              cursor: pointer;
+              font-weight: 600;
+              font-size: 13px;
+            ">
+              Retry Loading
+            </button>
           </div>
         `;
         clearInterval(fakeTimer);
